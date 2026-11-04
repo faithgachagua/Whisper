@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; --ink: 36 27 69; --canvas: 247 245 253; --surface: #ffffff; }
+.dark { color-scheme: dark; --ink: 236 232 250; --canvas: 18 13 43; --surface: #1D1640; }
+html { -webkit-text-size-adjust: 100%; }
+body { @apply bg-canvas text-ink antialiased; }
+
+:focus-visible { outline: 2px solid theme('colors.brand.500'); outline-offset: 2px; }
+
+@layer components {
+  .input { @apply w-full rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm text-ink placeholder:text-ink/40 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200; }
+  .card { @apply rounded-card bg-white shadow-card; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Dark theme: remaps the light surfaces and brand tints ---------- */
+.dark .card, .dark .bg-white { background-color: var(--surface); }
+.dark .bg-white\/90 { background-color: rgb(29 22 64 / .9); }
+.dark .bg-white\/60 { background-color: rgb(29 22 64 / .6); }
+.dark .input { background-color: #170F36; border-color: rgb(155 124 247 / .35); color: rgb(var(--ink)); }
+.dark .input::placeholder { color: rgb(var(--ink) / .4); }
+.dark .bg-brand-50, .dark .hover\:bg-brand-50:hover, .dark .has-\[\:checked\]\:bg-brand-50:has(:checked) { background-color: rgb(155 124 247 / .12); }
+.dark .bg-brand-100 { background-color: rgb(155 124 247 / .22); }
+.dark .border-brand-100, .dark .border-brand-200, .dark .divide-brand-100 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(155 124 247 / .25); }
+.dark .ring-brand-100, .dark .ring-brand-200 { --tw-ring-color: rgb(155 124 247 / .3); }
+.dark .text-brand-700 { color: #C4B2FF; }
+.dark .text-brand-800, .dark .text-brand-900 { color: #EDE6FF; }
+.dark .from-brand-50 { --tw-gradient-from: #170F36 var(--tw-gradient-from-position); --tw-gradient-to: rgb(23 15 54 / 0) var(--tw-gradient-to-position); }
+.dark .bg-red-50 { background-color: rgb(220 38 38 / .15); } .dark .text-red-800 { color: #FCA5A5; } .dark .ring-red-200 { --tw-ring-color: rgb(220 38 38 / .35); }
+.dark .bg-emerald-50 { background-color: rgb(16 185 129 / .15); } .dark .text-emerald-800 { color: #6EE7B7; } .dark .ring-emerald-200 { --tw-ring-color: rgb(16 185 129 / .35); }
+.dark .bg-red-100 { background-color: rgb(220 38 38 / .25); } .dark .text-red-700 { color: #FCA5A5; }

@@ -1,0 +1,28 @@
+import { Router } from 'express';
+import { adminRouter } from './admin/admin.routes';
+import { authRouter } from './auth/auth.routes';
+import { communitiesRouter } from './communities/communities.routes';
+import { moderationRouter } from './moderation/moderation.routes';
+import { notificationsRouter } from './notifications/notifications.routes';
+import { postsRouter } from './posts/posts.routes';
+import { presenceRouter } from './presence/presence.routes';
+import { reportsRouter } from './reports/reports.routes';
+import { safetyRouter } from './safety/safety.routes';
+import { searchRouter } from './search/search.routes';
+import { supportRouter } from './support/support.routes';
+import { usersRouter } from './users/users.routes';
+
+/** One router per feature module. Add a module = add a folder + one line here. */
+export const apiRouter = Router();
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/users', usersRouter);
+apiRouter.use('/communities', communitiesRouter);
+apiRouter.use('/posts', postsRouter);
+apiRouter.use('/support', supportRouter);
+apiRouter.use('/reports', reportsRouter);
+apiRouter.use('/moderation', moderationRouter);
+apiRouter.use('/notifications', notificationsRouter);
+apiRouter.use('/search', searchRouter);
+apiRouter.use('/presence', presenceRouter);
+apiRouter.use('/safety', safetyRouter);
+apiRouter.use('/admin', adminRouter);
