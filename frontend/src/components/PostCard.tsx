@@ -39,7 +39,7 @@ export function PostCard({ post, onChange, onHide, linkToPost = true }: { post: 
   const communityName = post.community ? (locale === 'sw' ? post.community.nameSw : post.community.name) : '';
 
   return (
-    <article className="card p-5">
+    <article className="card p-5 transition-shadow hover:shadow-lg">
       <header className="flex items-start gap-3">
         <Avatar name={post.author.pseudonym} online={post.author.online} />
         <div className="min-w-0 flex-1">

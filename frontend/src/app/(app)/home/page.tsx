@@ -4,7 +4,9 @@ import { Plus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { PostCard } from '@/components/PostCard';
 import { Button, ButtonLink, EmptyState, Notice, Spinner } from '@/components/ui';
+import { Avatar } from '@/components/ui';
 import { api, errMsg } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
 import type { Post } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -16,6 +18,7 @@ const TABS: Array<{ id: Feed; key: 'home.forYou' | 'home.latest' | 'home.followi
 
 export default function HomePage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [feed, setFeed] = useState<Feed>('for-you');
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
@@ -36,6 +39,11 @@ export default function HomePage() {
 
   return (
     <div>
+      <Link href="/share" className="card mb-5 flex items-center gap-3 p-4 transition-shadow hover:shadow-lg">
+        <Avatar name={user?.pseudonym ?? '?'} />
+        <span className="flex-1 rounded-full bg-canvas px-5 py-3 text-sm text-ink/50 ring-1 ring-brand-100">{t('share.placeholder')}</span>
+        <span className="hidden rounded-full bg-brand-600 px-4 py-2 text-xs font-bold text-white sm:block">{t('nav.share')}</span>
+      </Link>
       <div role="tablist" className="mb-5 flex gap-6 border-b border-brand-100">
         {TABS.map((tab) => (
           <button key={tab.id} role="tab" aria-selected={feed === tab.id} onClick={() => setFeed(tab.id)}

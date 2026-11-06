@@ -56,6 +56,13 @@ const sw: Partial<Record<MessageKey, string>> = {
   'listener.accept': 'Kubali', 'listener.decline': 'Kataa', 'listener.none': 'Hakuna maombi kwa sasa. Mapya yataonekana hapa.',
   'presence.onlineNow': 'mtandaoni sasa', 'presence.activeNow': 'wako hai sasa', 'presence.listeners': 'wasikilizaji mtandaoni sasa', 'presence.online': 'Mtandaoni', 'presence.lastActive': 'Mara ya mwisho kuwa hai',
   'presence.show': 'Onyesha ninapokuwa mtandaoni', 'presence.showSub': 'Watu kwenye mazungumzo yako wanaweza kuona uko mtandaoni. Zima ili uonekane nje ya mtandao. Bado unahesabiwa bila kutajwa kwenye jumla.',
+  'hero.tag': 'Mahali salama kwa ajili yako', 'hero.sub': 'Shiriki mawazo yako, tafuta msaada, na pata matumaini, bila kujulikana.',
+  'hero.f1t': 'Faragha yako ni muhimu', 'hero.f1d': 'Shiriki kwa usalama bila kujulikana', 'hero.f2t': 'Pata msaada', 'hero.f2d': 'Ungana na jamii inayojali',
+  'hero.f3t': 'Jifunze na ukue', 'hero.f3d': 'Pata rasilimali na ushauri wa kusaidia',
+  'about.badge': 'Kuhusu Whisper', 'about.body': 'Whisper ni mahali salama na pa kusaidiana mtandaoni ambapo unaweza kushiriki uzoefu wako, kupata mwongozo, na kuungana na wengine wanaokuelewa. Dhamira yetu ni kukuza afya ya akili, kujitambua na matumaini, kwa sababu hauko peke yako.',
+  'about.anon': '100% bila kujulikana', 'about.community': 'Jamii ya kusaidiana', 'about.wellbeing': 'Ustawi wa akili', 'about.here': 'Tuko nawe kila wakati',
+  'about.join': 'Jiunge na nafasi yetu salama', 'about.quote': 'Pamoja tunaweza kupona, kukua na kustawi.',
+  'rail.talk': 'Unahitaji mtu wa kuzungumza naye?', 'rail.talkSub': 'Wasikilizaji rika wako tayari kuzungumza.', 'rail.join': 'Jamii za kujiunga', 'rail.emergency': 'Dharura? Piga 999. Childline Kenya: 116.',
   'mod.title': 'Dashibodi ya msimamizi', 'admin.title': 'Dashibodi ya msimamizi mkuu',
 };
 

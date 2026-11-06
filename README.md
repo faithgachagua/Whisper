@@ -60,6 +60,7 @@ frontend/src
 - **Moderation**: reports queue (urgent first), remove/warn/restrict/suspend (ban = admin only), all audit-logged.
 - **Admin**: aggregated stats, small groups (<5) suppressed in demographics, emails visible to admins only.
 - **Presence**: the web app pings `/api/presence/heartbeat` every 30s while the tab is visible; someone is online if seen in the last 2 minutes. Members see only the number of *listeners* online and a dot on the other person inside their own chat (hidden if that person turns off “Show when I’m online”). Totals, the “N online now” pill, per-community activity and dots on avatars are **moderator/admin only**, never shown on anonymous posts, and staff see true presence. There is no public list of online members. Moderators and admins also get a 14-day complaints graph.
+- **UI**: animated login/landing (gradient, floating bubbles, staggered reveals; hero photos live in `frontend/public/login-hero.jpg` and `about-hero.jpg`; swap them to change the imagery), full-width top bar, feed pages with a right rail, dark/light theme.
 - **Bilingual**: English/Kiswahili switch; missing Kiswahili strings fall back to English.
 
 ## Must-do before launch

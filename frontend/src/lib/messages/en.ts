@@ -54,6 +54,13 @@ const en = {
   'listener.accept': 'Accept', 'listener.decline': 'Decline', 'listener.none': 'No requests right now. We’ll show new ones here.',
   'presence.onlineNow': 'online now', 'presence.activeNow': 'active now', 'presence.listeners': 'listeners online now', 'presence.online': 'Online', 'presence.lastActive': 'Last active',
   'presence.show': 'Show when I’m online', 'presence.showSub': 'People in your chats can see that you’re online. Turn this off to appear offline. You’re still counted anonymously in totals.',
+  'hero.tag': 'A safe space for you', 'hero.sub': 'Share your thoughts, seek support, and find hope, anonymously.',
+  'hero.f1t': 'Your privacy matters', 'hero.f1d': 'Share safely and anonymously', 'hero.f2t': 'Find support', 'hero.f2d': 'Connect with a caring community',
+  'hero.f3t': 'Learn & grow', 'hero.f3d': 'Get helpful resources and advice',
+  'about.badge': 'About Whisper', 'about.body': 'Whisper is a safe and supportive online space where you can share your experiences, find guidance, and connect with others who understand. Our mission is to promote mental wellness, self-awareness and hope, because you are not alone.',
+  'about.anon': '100% anonymous', 'about.community': 'Supportive community', 'about.wellbeing': 'Mental wellbeing', 'about.here': 'Always here for you',
+  'about.join': 'Join our safe space', 'about.quote': 'Together, we can heal, grow and thrive.',
+  'rail.talk': 'Need someone to talk to?', 'rail.talkSub': 'Peer listeners are ready to chat.', 'rail.join': 'Communities to join', 'rail.emergency': 'In an emergency call 999. Childline Kenya: 116.',
   'mod.title': 'Moderator dashboard', 'admin.title': 'Admin dashboard',
 } as const;
 

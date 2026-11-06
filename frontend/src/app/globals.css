@@ -34,3 +34,13 @@ body { @apply bg-canvas text-ink antialiased; }
 .dark .bg-red-50 { background-color: rgb(220 38 38 / .15); } .dark .text-red-800 { color: #FCA5A5; } .dark .ring-red-200 { --tw-ring-color: rgb(220 38 38 / .35); }
 .dark .bg-emerald-50 { background-color: rgb(16 185 129 / .15); } .dark .text-emerald-800 { color: #6EE7B7; } .dark .ring-emerald-200 { --tw-ring-color: rgb(16 185 129 / .35); }
 .dark .bg-red-100 { background-color: rgb(220 38 38 / .25); } .dark .text-red-700 { color: #FCA5A5; }
+
+/* ---------- Animated auth / landing backdrop + dark glass form ---------- */
+.auth-bg { background: linear-gradient(120deg, #0A0E2E 0%, #1F1766 35%, #4C2AB0 65%, #0F766E 105%); background-size: 220% 220%; }
+.glass { --ink: 255 255 255; }
+.glass .input { background-color: rgb(255 255 255 / .08); border-color: rgb(255 255 255 / .28); color: #fff; }
+.glass .input::placeholder { color: rgb(255 255 255 / .55); }
+.glass .input:focus { border-color: #2DD4BF; --tw-ring-color: rgb(45 212 191 / .3); }
+.glass .text-brand-900 { color: #fff; }
+.glass .text-brand-600 { color: #5EEAD4; }
+.glass input[type='checkbox'] { accent-color: #2DD4BF; }
