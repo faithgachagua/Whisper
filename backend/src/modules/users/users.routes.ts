@@ -5,6 +5,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../core/errors';
 import { asyncHandler, authenticate, validate } from '../../core/middleware';
 import { audit, selfView, tierFromBand } from '../../core/serializers';
 import { MIN_PARTICIPATION_AGE } from '../../config/safety';
+import { removeImages } from '../uploads/uploads.service';
 
 const pseudonym = z.string().trim().min(3, 'Use at least 3 characters.').max(24, 'Use at most 24 characters.').regex(/^[A-Za-z0-9_ .-]+$/, 'Use letters, numbers, spaces, dots, dashes or underscores.');
 
@@ -124,6 +125,7 @@ usersRouter.post('/me/delete', validate(deleteSchema), asyncHandler((req, res) =
   // Remove personal content and detach the account. Reports and audit entries are kept for safeguarding.
   db.data.posts.forEach((p) => { if (p.authorId === u.id) { p.status = 'removed'; p.body = ''; } });
   db.data.comments.forEach((c) => { if (c.authorId === u.id) { c.status = 'removed'; c.body = ''; } });
+  removeImages(db.data.images.filter((i) => i.ownerId === u.id).map((i) => i.id));
   db.data.saves = db.data.saves.filter((s) => s.userId !== u.id);
   db.data.memberships = db.data.memberships.filter((m) => m.userId !== u.id);
   db.data.notifications = db.data.notifications.filter((n) => n.userId !== u.id);

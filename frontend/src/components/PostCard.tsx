@@ -6,6 +6,7 @@ import { api, errMsg } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import type { Post, ReactionType } from '@/lib/types';
 import { cn, timeAgo } from '@/lib/utils';
+import { ImageGrid } from './ImageGrid';
 import { ReportDialog } from './ReportDialog';
 import { Avatar } from './ui';
 
@@ -69,6 +70,8 @@ export function PostCard({ post, onChange, onHide, linkToPost = true }: { post: 
       ) : (
         <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed">{post.body}</p>
       )}
+
+      {post.images && post.images.length > 0 && <ImageGrid images={post.images} autoReveal={post.mine} />}
 
       <footer className="mt-4 flex flex-wrap items-center gap-2">
         {REACTIONS.map(({ type, icon: Icon }) => (

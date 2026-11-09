@@ -1,7 +1,7 @@
 import { db, newId, now } from '../../core/db';
 import type { Report, ReportReason, ReportTarget } from '../../core/types';
 
-const URGENT: Array<Report['reason']> = ['self_harm', 'grooming', 'crisis_language'];
+const URGENT: Array<Report['reason']> = ['self_harm', 'grooming', 'doxxing', 'crisis_language'];
 
 export function fileReport(input: { reporterId: string; targetType: ReportTarget; targetId: string; reason: Report['reason']; details?: string }): Report {
   const existing = db.data.reports.find(

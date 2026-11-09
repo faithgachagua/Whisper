@@ -3,7 +3,7 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { env } from '../config/env';
 import type {
-  AuditLog, Block, Comment, Community, Conversation, Membership, Message, Notification,
+  AuditLog, Block, Comment, Community, Conversation, ImageRecord, Membership, Message, Notification,
   Post, Reaction, Report, Save, SupportRequest, User,
 } from './types';
 
@@ -22,11 +22,12 @@ export interface Data {
   reports: Report[];
   notifications: Notification[];
   auditLogs: AuditLog[];
+  images: ImageRecord[];
 }
 
 const empty = (): Data => ({
   users: [], communities: [], memberships: [], posts: [], comments: [], reactions: [], saves: [],
-  blocks: [], supportRequests: [], conversations: [], messages: [], reports: [], notifications: [], auditLogs: [],
+  blocks: [], supportRequests: [], conversations: [], messages: [], reports: [], notifications: [], auditLogs: [], images: [],
 });
 
 /**

@@ -17,5 +17,11 @@ export const COMMUNITY_RULES = [
   'If you or someone else is in danger, contact emergency services or a helpline right away.',
 ];
 
+/**
+ * Photos are limited to self-reported adults. Young members and anyone whose age is unknown cannot upload,
+ * and cannot be sent photos in support chats. Changing this needs a child-safety review first.
+ */
+export const IMAGES_ADULTS_ONLY = true;
+
 /** Self-reported under-13 users cannot take part. Confirm the final age with legal review before launch. */
 export const MIN_PARTICIPATION_AGE = 13;

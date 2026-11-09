@@ -12,12 +12,12 @@ export interface User {
 
 export interface Community {
   id: string; slug: string; name: string; nameSw: string; description: string; descriptionSw: string;
-  youthSafe: boolean; memberCount: number; activeNow: number; joined: boolean; allowed: boolean;
+  youthSafe: boolean; noImages?: boolean; rules?: string[]; rulesSw?: string[]; memberCount: number; activeNow: number; joined: boolean; allowed: boolean;
 }
 
 export interface Post {
   id: string; community: { id: string; slug: string; name: string; nameSw: string } | null;
-  author: { pseudonym: string; isMe: boolean; online?: boolean }; body: string; createdAt: string;
+  author: { pseudonym: string; isMe: boolean; online?: boolean }; body: string; images?: { id: string; url: string }[]; createdAt: string;
   reactions: Record<ReactionType, number>; reactionTotal: number; myReaction: ReactionType | null;
   commentCount: number; saved: boolean; mine: boolean;
 }
@@ -29,9 +29,9 @@ export interface SafetyPayload { crisis: true; message: string; resources: { id:
 export interface Notification { id: string; type: string; title: string; body: string; link?: string; read: boolean; createdAt: string }
 
 export interface Conversation {
-  id: string; status: 'open' | 'closed'; createdAt: string; iAmListener: boolean;
+  id: string; status: 'open' | 'closed'; createdAt: string; iAmListener: boolean; imagesAllowed?: boolean;
   other: { pseudonym: string; label: string; id?: string; online?: boolean; lastSeenAt?: string | null }; lastMessage: { body: string; createdAt: string } | null;
 }
-export interface Message { id: string; body: string; createdAt: string; mine: boolean }
+export interface Message { id: string; body: string; imageUrl?: string | null; createdAt: string; mine: boolean }
 
 export interface ListenerRequest { id: string; topics: string[]; createdAt: string; waitingMinutes: number; requester: string; isYouth: boolean }

@@ -44,6 +44,12 @@ export interface Community {
   description: string;
   descriptionSw: string;
   youthSafe: boolean;
+  /** Photos are not allowed here. */
+  noImages?: boolean;
+  /** Also reject links, for communities where identifying people is a risk. */
+  strictIdentity?: boolean;
+  rules?: string[];
+  rulesSw?: string[];
 }
 
 export interface Membership { userId: string; communityId: string; joinedAt: string }
@@ -54,6 +60,7 @@ export interface Post {
   communityId: string;
   body: string;
   anonymous: boolean;
+  imageIds?: string[];
   status: 'visible' | 'removed';
   crisisFlag: boolean;
   createdAt: string;
@@ -97,9 +104,20 @@ export interface Conversation {
   createdAt: string;
 }
 
-export interface Message { id: string; conversationId: string; senderId: string; body: string; flagged: boolean; createdAt: string }
+export interface Message { id: string; conversationId: string; senderId: string; body: string; imageId?: string; flagged: boolean; createdAt: string }
 
-export type ReportReason = 'harassment' | 'hate' | 'self_harm' | 'sexual_content' | 'spam' | 'grooming' | 'other';
+export interface ImageRecord {
+  id: string;
+  ownerId: string;
+  status: 'pending' | 'attached' | 'removed';
+  context: 'post' | 'message';
+  bytes: number;
+  width: number;
+  height: number;
+  createdAt: string;
+}
+
+export type ReportReason = 'harassment' | 'hate' | 'self_harm' | 'sexual_content' | 'spam' | 'grooming' | 'doxxing' | 'other';
 export type ReportTarget = 'post' | 'comment' | 'user' | 'conversation';
 
 export interface Report {

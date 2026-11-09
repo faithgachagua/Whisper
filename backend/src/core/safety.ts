@@ -16,6 +16,7 @@ const PII = [
 
 const RISKY_REQUESTS = [/\bsend (me )?(a )?(pic|photo|nudes?)/i, /\bnitumie picha/i, /\b(dm|inbox) me\b/i, /\bkeep (this|it) (a )?secret\b/i];
 
+export const hasLink = (text: string) => /(https?:\/\/|www\.)\S+/i.test(text);
 export const hasCrisisLanguage = (text: string) => CRISIS.some((r) => r.test(text));
 export const hasPersonalInfo = (text: string) => PII.some((r) => r.test(text));
 export const hasRiskyContactRequest = (text: string) => RISKY_REQUESTS.some((r) => r.test(text));

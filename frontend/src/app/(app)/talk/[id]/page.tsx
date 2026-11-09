@@ -1,12 +1,14 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import { Ban, Flag, LogOut, Send } from 'lucide-react';
+import { Ban, Flag, ImagePlus, Loader2, LogOut, Send, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { OnlineDot } from '@/components/OnlineDot';
+import { ImageGrid } from '@/components/ImageGrid';
 import { ReportDialog } from '@/components/ReportDialog';
 import { SafetyCard } from '@/components/SafetyCard';
 import { Button, Notice, Spinner } from '@/components/ui';
-import { api, errMsg } from '@/lib/api';
+import { api, assetUrl, errMsg, uploadImage } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
 import type { Conversation, Message, SafetyPayload } from '@/lib/types';
 import { cn, timeAgo } from '@/lib/utils';
@@ -15,6 +17,10 @@ export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
   const { t, locale } = useI18n();
   const router = useRouter();
+  const { user } = useAuth();
+  const [photo, setPhoto] = useState<{ id: string; url: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [conv, setConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hint, setHint] = useState(false);
@@ -41,13 +47,23 @@ export default function ChatPage() {
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() && !photo) return;
     setError('');
     try {
-      const r = await api<{ message: Message; safety: SafetyPayload | null }>(`/support/conversations/${id}/messages`, { body: { body: text } });
+      const r = await api<{ message: Message; safety: SafetyPayload | null }>(`/support/conversations/${id}/messages`, { body: { body: text, imageId: photo?.id } });
       last.current = r.message.createdAt;
-      setMessages((cur) => [...cur, r.message]); setText(''); if (r.safety) setSafety(r.safety);
+      setMessages((cur) => [...cur, r.message]); setText(''); setPhoto(null); if (r.safety) setSafety(r.safety);
     } catch (err) { setError(errMsg(err)); }
+  }
+
+  async function pick(files: FileList | null) {
+    const f = files?.[0];
+    if (fileRef.current) fileRef.current.value = '';
+    if (!f) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) { setError('Use a JPEG, PNG or WebP photo.'); return; }
+    if (f.size > 5 * 1024 * 1024) { setError('Photos must be under 5 MB.'); return; }
+    setUploading(true); setError('');
+    try { setPhoto(await uploadImage(f, 'message')); } catch (e) { setError(errMsg(e)); } finally { setUploading(false); }
   }
 
   async function leave() { await api(`/support/conversations/${id}/leave`, { method: 'POST' }).catch(() => undefined); router.push('/talk'); }
@@ -74,7 +90,10 @@ export default function ChatPage() {
       <div className="flex-1 space-y-2 overflow-y-auto rounded-card bg-white/60 p-4" aria-live="polite">
         {messages.map((m) => (
           <div key={m.id} className={cn('flex', m.mine ? 'justify-end' : 'justify-start')}>
-            <p className={cn('max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm', m.mine ? 'rounded-br-md bg-brand-600 text-white' : 'rounded-bl-md bg-white text-ink shadow-card')}>{m.body}</p>
+            <div className={cn('max-w-[80%] rounded-2xl px-3 py-2.5 text-sm', m.mine ? 'rounded-br-md bg-brand-600 text-white' : 'rounded-bl-md bg-white text-ink shadow-card')}>
+              {m.imageUrl && <div className="mb-1 w-56 max-w-full"><ImageGrid images={[{ id: m.id, url: m.imageUrl }]} autoReveal={m.mine} /></div>}
+              {m.body && <p className="whitespace-pre-wrap px-1">{m.body}</p>}
+            </div>
           </div>
         ))}
         {safety && <SafetyCard safety={safety} />}
@@ -83,9 +102,26 @@ export default function ChatPage() {
 
       {error && <div className="mt-2"><Notice>{error}</Notice></div>}
       {closed ? <p className="mt-3 text-center text-sm text-ink/60">{t('talk.ended')}</p> : (
-        <form onSubmit={send} className="mt-3 flex gap-2">
-          <input className="input" value={text} maxLength={1000} placeholder={t('talk.typeMessage')} onChange={(e) => setText(e.target.value)} aria-label={t('talk.typeMessage')} />
-          <Button type="submit" aria-label={t('common.send')} disabled={!text.trim()}><Send className="h-4 w-4" /></Button>
+        <form onSubmit={send} className="mt-3 space-y-2">
+          {photo && (
+            <div className="relative inline-block h-20 w-20 overflow-hidden rounded-xl ring-1 ring-brand-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={assetUrl(photo.url)} alt="Photo to send" className="h-full w-full object-cover" />
+              <button type="button" onClick={() => setPhoto(null)} aria-label="Remove photo" className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white"><X className="h-3 w-3" /></button>
+            </div>
+          )}
+          <div className="flex gap-2">
+            {conv.imagesAllowed && user?.ageTier === 'adult' && (
+              <>
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} aria-label="Add photo" className="rounded-xl px-3 text-brand-700 ring-1 ring-brand-200 hover:bg-brand-50 disabled:opacity-60">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                </button>
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => pick(e.target.files)} />
+              </>
+            )}
+            <input className="input" value={text} maxLength={1000} placeholder={t('talk.typeMessage')} onChange={(e) => setText(e.target.value)} aria-label={t('talk.typeMessage')} />
+            <Button type="submit" aria-label={t('common.send')} disabled={!text.trim() && !photo}><Send className="h-4 w-4" /></Button>
+          </div>
         </form>
       )}
       {report && <ReportDialog targetType="conversation" targetId={id} onClose={() => setReport(false)} />}

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ReportsChart, OnlinePanel } from '@/components/StaffPanels';
 import { Button, EmptyState, Notice, PageHeader, Spinner, StatCard } from '@/components/ui';
-import { api, errMsg } from '@/lib/api';
+import { api, assetUrl, errMsg } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n';
 import { cn, timeAgo } from '@/lib/utils';
@@ -10,7 +10,8 @@ import { cn, timeAgo } from '@/lib/utils';
 interface Row { id: string; targetType: string; reason: string; priority: 'normal' | 'urgent'; status: string; createdAt: string; source: string; preview: string }
 interface Detail {
   report: Row & { details: string }; content: string;
-  messages: { id: string; body: string; sender: string; flagged: boolean }[];
+  images?: { id: string; url: string }[];
+  messages: { id: string; body: string; sender: string; flagged: boolean; imageUrl?: string | null }[];
   subject: { pseudonym: string; status: string; strikes: number; group: string; role: string } | null; priorReports: number;
 }
 
@@ -75,8 +76,9 @@ export default function ModeratorPage() {
           <section className="card h-fit space-y-4 p-5" aria-label="Report detail">
             <div><p className="text-xs font-semibold uppercase text-ink/50">{detail.report.targetType}</p>
               {detail.content && <p className="mt-1 whitespace-pre-wrap rounded-xl bg-canvas p-3 text-sm">{detail.content}</p>}
+              {detail.images && detail.images.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{detail.images.map((i) => <a key={i.id} href={assetUrl(i.url)} target="_blank" rel="noreferrer">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={assetUrl(i.url)} alt="Reported photo" className="h-24 w-24 rounded-lg object-cover" /></a>)}</div>}
               {detail.report.details && <p className="mt-2 text-sm text-ink/70">Reporter note: {detail.report.details}</p>}</div>
-            {detail.messages.length > 0 && <ul className="max-h-60 space-y-1.5 overflow-y-auto rounded-xl bg-canvas p-3 text-sm">{detail.messages.map((m) => <li key={m.id} className={m.flagged ? 'font-semibold text-red-700' : ''}><span className="text-xs uppercase text-ink/45">{m.sender}: </span>{m.body}</li>)}</ul>}
+            {detail.messages.length > 0 && <ul className="max-h-60 space-y-1.5 overflow-y-auto rounded-xl bg-canvas p-3 text-sm">{detail.messages.map((m) => <li key={m.id} className={m.flagged ? 'font-semibold text-red-700' : ''}><span className="text-xs uppercase text-ink/45">{m.sender}: </span>{m.body}{m.imageUrl && <a href={assetUrl(m.imageUrl)} target="_blank" rel="noreferrer" className="ml-2 text-xs font-semibold text-brand-600 underline">[photo]</a>}</li>)}</ul>}
             {detail.subject && <p className="text-sm text-ink/70"><span className="font-semibold">{detail.subject.pseudonym}</span> · {detail.subject.group} · {detail.subject.status} · {detail.subject.strikes} strikes · {detail.priorReports} other reports</p>}
             {detail.report.status === 'open' ? (<>
               <textarea className="input min-h-20" placeholder="Note (shown to the member for warnings and removals)" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />

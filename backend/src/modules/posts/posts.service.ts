@@ -1,5 +1,6 @@
 import { db } from '../../core/db';
 import { isOnline, isStaff } from '../../core/presence';
+import { attachedImages } from '../uploads/uploads.service';
 import { findCommunity, findUser, hiddenAuthorIds, isProtected } from '../../core/serializers';
 import type { Comment, Post, ReactionType, User } from '../../core/types';
 
@@ -19,6 +20,7 @@ export function postView(p: Post, viewer: User) {
     // Anonymous posts never expose the author's account or pseudonym.
     author: { pseudonym: p.anonymous ? 'Anonymous member' : author?.pseudonym ?? 'Former member', isMe: p.authorId === viewer.id, online: !p.anonymous && isStaff(viewer) && !!author && isOnline(author) },
     body: p.body,
+    images: attachedImages(p.imageIds),
     createdAt: p.createdAt,
     reactions,
     reactionTotal: reactions.listening + reactions.not_alone + reactions.sending_support,

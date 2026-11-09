@@ -33,4 +33,23 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
   return json as T;
 }
 
+/** Photos come back as API-relative signed links (e.g. /uploads/<id>?t=...). */
+export const assetUrl = (path: string) => `${BASE}${path}`;
+
+export async function uploadImage(file: File, context: 'post' | 'message'): Promise<{ id: string; url: string }> {
+  const token = tokenStore.get();
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/uploads?context=${context}`, { method: 'POST', headers: { 'Content-Type': file.type, ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: file });
+  } catch {
+    throw new ApiError(0, 'NETWORK', 'Can’t reach Whisper right now. Check your connection and try again.');
+  }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const e = (json as { error?: { code?: string; message?: string } }).error ?? {};
+    throw new ApiError(res.status, e.code ?? 'ERROR', e.message ?? 'Could not upload that photo.');
+  }
+  return (json as { image: { id: string; url: string } }).image;
+}
+
 export const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');

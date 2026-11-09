@@ -19,5 +19,6 @@ export const env = {
   dataFile: process.env.DATA_FILE ?? path.resolve(process.cwd(), 'data', 'db.json'),
   seedDemo: (process.env.SEED_DEMO ?? (isProd ? 'false' : 'true')) === 'true',
   seedPassword: process.env.SEED_PASSWORD ?? 'Whisper#2026',
+  uploadDir: process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), 'data', 'uploads'),
   smallGroupThreshold: Number(process.env.SMALL_GROUP_THRESHOLD ?? 5),
 };

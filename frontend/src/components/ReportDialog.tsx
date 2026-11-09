@@ -6,7 +6,7 @@ import { Button, Modal, Notice } from './ui';
 
 const REASONS = [
   ['harassment', 'Harassment or bullying'], ['hate', 'Hate or discrimination'], ['self_harm', 'Self-harm or crisis'],
-  ['grooming', 'Unsafe contact with a young person'], ['sexual_content', 'Sexual content'], ['spam', 'Spam'], ['other', 'Something else'],
+  ['grooming', 'Unsafe contact with a young person'], ['doxxing', 'Names or exposes a real person'], ['sexual_content', 'Sexual content'], ['spam', 'Spam'], ['other', 'Something else'],
 ] as const;
 
 export function ReportDialog({ targetType, targetId, onClose }: { targetType: 'post' | 'comment' | 'user' | 'conversation'; targetId: string; onClose: () => void }) {

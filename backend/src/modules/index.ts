@@ -10,6 +10,7 @@ import { reportsRouter } from './reports/reports.routes';
 import { safetyRouter } from './safety/safety.routes';
 import { searchRouter } from './search/search.routes';
 import { supportRouter } from './support/support.routes';
+import { uploadsRouter } from './uploads/uploads.routes';
 import { usersRouter } from './users/users.routes';
 
 /** One router per feature module. Add a module = add a folder + one line here. */
@@ -24,5 +25,6 @@ apiRouter.use('/moderation', moderationRouter);
 apiRouter.use('/notifications', notificationsRouter);
 apiRouter.use('/search', searchRouter);
 apiRouter.use('/presence', presenceRouter);
+apiRouter.use('/uploads', uploadsRouter);
 apiRouter.use('/safety', safetyRouter);
 apiRouter.use('/admin', adminRouter);

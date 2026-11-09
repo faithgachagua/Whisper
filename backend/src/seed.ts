@@ -11,13 +11,32 @@ const COMMUNITIES: Array<Omit<Community, 'id'>> = [
   { slug: 'school-career', name: 'School and Career', nameSw: 'Shule na Kazi', description: 'Exams, campus life, employment and goals.', descriptionSw: 'Mitihani, maisha ya chuo, ajira na malengo.', youthSafe: true },
   { slug: 'secrets-confessions', name: 'Secrets and Confessions', nameSw: 'Siri na Maungamo', description: 'Share without judgment.', descriptionSw: 'Shiriki bila hukumu.', youthSafe: false },
   { slug: 'bullying-unfair-treatment', name: 'Bullying and Unfair Treatment', nameSw: 'Uonevu na Kutendewa Isivyo Haki', description: 'Speak up about bullying and unfair treatment.', descriptionSw: 'Sema kuhusu uonevu na kutendewa isivyo haki.', youthSafe: true },
+  {
+    slug: 'cheating-betrayal', name: 'Cheating and Betrayal', nameSw: 'Usaliti na Kudanganywa',
+    description: 'Share what happened and how you are coping, without naming or exposing anyone.',
+    descriptionSw: 'Shiriki kilichotokea na unavyokabiliana, bila kumtaja au kumwanika mtu.',
+    youthSafe: false, noImages: true, strictIdentity: true,
+    rules: [
+      'Tell your story, not their identity: no names, photos, phone numbers, workplaces, schools or social handles.',
+      'No calling out, doxxing or “exposing” real people. Posts that identify someone are removed and can lead to restrictions.',
+      'This space is for healing, advice and being heard, not revenge. Support each other.',
+      'Accusing a named person can be defamation and can harm real people. If you have been harmed, consider counselling or legal advice.',
+    ],
+    rulesSw: [
+      'Simulia hadithi yako, si utambulisho wa mtu: bila majina, picha, namba za simu, mahali pa kazi, shule au majina ya mitandaoni.',
+      'Hakuna kuwaanika, kuwatafutia taarifa au “kuwafichua” watu halisi. Machapisho yanayomtambulisha mtu huondolewa na yanaweza kusababisha vikwazo.',
+      'Hapa ni mahali pa uponyaji, ushauri na kusikilizwa, si kulipiza kisasi. Saidianeni.',
+      'Kumtuhumu mtu aliyetajwa kunaweza kuwa kashfa na kudhuru watu halisi. Ukiumizwa, fikiria ushauri nasaha au wa kisheria.',
+    ],
+  },
   { slug: 'personal-growth', name: 'Personal Growth and Life Advice', nameSw: 'Ukuaji Binafsi na Ushauri wa Maisha', description: 'Habits, goals and life lessons.', descriptionSw: 'Mazoea, malengo na mafunzo ya maisha.', youthSafe: true },
 ];
 
 export function seed() {
-  if (db.data.communities.length === 0) {
-    db.data.communities = COMMUNITIES.map((c) => ({ id: newId(), ...c }));
-  }
+  // Add any launch community that is missing (also upgrades databases created by older versions).
+  COMMUNITIES.forEach((c) => {
+    if (!db.data.communities.some((x) => x.slug === c.slug)) db.data.communities.push({ id: newId(), ...c });
+  });
   if (!env.seedDemo || db.data.users.length > 0) { db.save(); return; }
 
   const hash = bcrypt.hashSync(env.seedPassword, 10);

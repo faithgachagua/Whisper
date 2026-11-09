@@ -8,6 +8,7 @@ import { hasCrisisLanguage, hasPersonalInfo, hasRiskyContactRequest, safetyPaylo
 import { ageGroupLabel, findUser, isProtected, notify } from '../../core/serializers';
 import type { Conversation, SupportRequest, User } from '../../core/types';
 import { flagForReview } from '../reports/reports.service';
+import { markAttached, signedUrl, validateImages } from '../uploads/uploads.service';
 
 export const supportRouter = Router();
 supportRouter.use(authenticate);
@@ -136,6 +137,7 @@ function convView(conv: Conversation, me: User) {
   const last = db.data.messages.filter((m) => m.conversationId === conv.id).slice(-1)[0];
   return {
     id: conv.id, status: conv.status, createdAt: conv.createdAt, iAmListener,
+    imagesAllowed: !isProtected(findUser(conv.memberId)!),
     other: { pseudonym: other?.pseudonym ?? 'Former member', label: iAmListener ? (other ? ageGroupLabel(other) : 'Member') : 'Peer listener', id: other?.id, ...(other ? visiblePresence(other) : { online: false, lastSeenAt: null }) },
     lastMessage: last ? { body: last.body.slice(0, 80), createdAt: last.createdAt } : null,
   };
@@ -152,7 +154,8 @@ supportRouter.get('/conversations/:id', (req, res) => {
   const { conv, me, iAmListener } = loadConversation(req);
   const after = typeof req.query.after === 'string' ? req.query.after : '';
   const all = db.data.messages.filter((m) => m.conversationId === conv.id);
-  const messages = all.filter((m) => m.createdAt > after).map((m) => ({ id: m.id, body: m.body, createdAt: m.createdAt, mine: m.senderId === me.id }));
+  const live = (id?: string) => !!id && db.data.images.some((i) => i.id === id && i.status === 'attached');
+  const messages = all.filter((m) => m.createdAt > after).map((m) => ({ id: m.id, body: m.body, imageUrl: live(m.imageId) ? signedUrl(m.imageId!) : null, createdAt: m.createdAt, mine: m.senderId === me.id }));
   res.json({
     conversation: convView(conv, me), messages,
     // Tells a listener to follow the escalation steps without exposing anything else.
@@ -160,21 +163,26 @@ supportRouter.get('/conversations/:id', (req, res) => {
   });
 });
 
-const messageSchema = z.object({ body: z.string().trim().min(1).max(1000) });
+const messageSchema = z.object({ body: z.string().trim().max(1000).default(''), imageId: z.string().optional() })
+  .refine((v) => v.body.length > 0 || !!v.imageId, { message: 'Write a message or add a photo.' });
 
 supportRouter.post('/conversations/:id/messages', validate(messageSchema), asyncHandler((req, res) => {
   const { conv, me } = loadConversation(req);
   assertCanPublish(me);
   if (conv.status !== 'open') throw conflict('This conversation has ended.', 'CONVERSATION_CLOSED');
-  const { body } = req.body as z.infer<typeof messageSchema>;
+  const { body, imageId } = req.body as z.infer<typeof messageSchema>;
   const member = findUser(conv.memberId)!;
+  // No photos in chats with young or unverified-age members.
+  if (imageId && isProtected(member)) throw forbidden('Photos can’t be shared in this conversation.', 'IMAGES_NOT_ALLOWED');
+  const imgs = imageId ? validateImages(me.id, [imageId], 'message') : [];
   // Protected interactions: members who are young or of unverified age cannot exchange contact details.
   if (isProtected(member) && hasPersonalInfo(body)) {
     throw badRequest('For everyone’s safety, contact details can’t be shared in chat.', 'CONTAINS_PERSONAL_INFO');
   }
   const crisis = hasCrisisLanguage(body);
   const risky = me.id === conv.listenerId && isProtected(member) && hasRiskyContactRequest(body);
-  const msg = { id: newId(), conversationId: conv.id, senderId: me.id, body, flagged: crisis || risky, createdAt: now() };
+  const msg = { id: newId(), conversationId: conv.id, senderId: me.id, body, imageId: imgs[0]?.id, flagged: crisis || risky, createdAt: now() };
+  markAttached(imgs);
   db.data.messages.push(msg);
   if (crisis) flagForReview('conversation', conv.id, 'crisis_language', 'Automatic: possible crisis language in a support chat.');
   if (risky) flagForReview('conversation', conv.id, 'grooming', 'Automatic: listener message to a protected member matched a risky-contact pattern.');
@@ -182,7 +190,7 @@ supportRouter.post('/conversations/:id/messages', validate(messageSchema), async
   notify(otherId, { type: 'support', title: 'New message', body: 'You have a new message.', link: `/talk/${conv.id}` });
   db.save();
   res.status(201).json({
-    message: { id: msg.id, body: msg.body, createdAt: msg.createdAt, mine: true },
+    message: { id: msg.id, body: msg.body, imageUrl: msg.imageId ? signedUrl(msg.imageId) : null, createdAt: msg.createdAt, mine: true },
     safety: crisis && me.id === conv.memberId ? safetyPayload(member.ageTier) : null,
   });
 }));

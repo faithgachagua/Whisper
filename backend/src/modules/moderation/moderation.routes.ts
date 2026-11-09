@@ -7,6 +7,7 @@ import { SAFETY_RESOURCES } from '../../config/safety';
 import { isOnline } from '../../core/presence';
 import { ageGroupLabel, audit, findUser, notify } from '../../core/serializers';
 import type { Report } from '../../core/types';
+import { attachedImages, removeImages, signedUrl } from '../uploads/uploads.service';
 
 export const moderationRouter = Router();
 moderationRouter.use(authenticate, requireRole('moderator', 'admin'));
@@ -95,11 +96,13 @@ moderationRouter.get('/reports/:id', (req, res) => {
   const messages = r.targetType === 'conversation'
     ? db.data.messages.filter((m) => m.conversationId === r.targetId).slice(-50).map((m) => ({
         id: m.id, body: m.body, createdAt: m.createdAt, flagged: m.flagged,
+        imageUrl: m.imageId && db.data.images.some((i) => i.id === m.imageId && i.status === 'attached') ? signedUrl(m.imageId) : null,
         sender: m.senderId === db.data.conversations.find((c) => c.id === r.targetId)?.listenerId ? 'listener' : 'member',
       }))
     : [];
   res.json({
     report: r, content: t.content, messages,
+    images: r.targetType === 'post' ? attachedImages(db.data.posts.find((x) => x.id === r.targetId)?.imageIds) : [],
     subject: author ? { id: author.id, pseudonym: author.pseudonym, status: author.status, strikes: author.strikes, group: ageGroupLabel(author), role: author.role } : null,
     priorReports: t.authorId ? db.data.reports.filter((x) => x.id !== r.id && resolveTarget(x).authorId === t.authorId).length : 0,
   });
@@ -130,9 +133,11 @@ moderationRouter.post('/reports/:id/resolve', validate(resolveSchema), asyncHand
   switch (action) {
     case 'dismiss': break;
     case 'remove_content': {
-      if (r.targetType === 'post') { const p = db.data.posts.find((x) => x.id === r.targetId); if (p) p.status = 'removed'; }
+      if (r.targetType === 'post') { const p = db.data.posts.find((x) => x.id === r.targetId); if (p) { p.status = 'removed'; removeImages(p.imageIds ?? []); } }
       else if (r.targetType === 'comment') { const c = db.data.comments.find((x) => x.id === r.targetId); if (c) c.status = 'removed'; }
-      else throw badRequest('Only posts and comments can be removed.');
+      else if (r.targetType === 'conversation') {
+        removeImages(db.data.messages.filter((m) => m.conversationId === r.targetId && m.imageId).map((m) => m.imageId!));
+      } else throw badRequest('Only posts, comments and chat photos can be removed.');
       if (subject) notify(subject.id, { type: 'moderation', title: 'Your content was removed', body: note || 'It broke our community guidelines.', link: '/help' });
       break;
     }

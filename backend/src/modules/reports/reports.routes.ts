@@ -8,7 +8,7 @@ import { fileReport } from './reports.service';
 const schema = z.object({
   targetType: z.enum(['post', 'comment', 'user', 'conversation']),
   targetId: z.string().min(1),
-  reason: z.enum(['harassment', 'hate', 'self_harm', 'sexual_content', 'spam', 'grooming', 'other']),
+  reason: z.enum(['harassment', 'hate', 'self_harm', 'sexual_content', 'spam', 'grooming', 'doxxing', 'other']),
   details: z.string().max(1000).optional(),
 });
 

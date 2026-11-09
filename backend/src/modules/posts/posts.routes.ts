@@ -3,10 +3,11 @@ import { z } from 'zod';
 import { db, newId, now } from '../../core/db';
 import { badRequest, forbidden, notFound } from '../../core/errors';
 import { asyncHandler, assertCanPublish, authenticate, validate } from '../../core/middleware';
-import { hasCrisisLanguage, hasPersonalInfo, safetyPayload } from '../../core/safety';
+import { hasCrisisLanguage, hasLink, hasPersonalInfo, safetyPayload } from '../../core/safety';
 import { communityAllowedFor, findCommunity, notify } from '../../core/serializers';
 import type { Post } from '../../core/types';
 import { flagForReview } from '../reports/reports.service';
+import { markAttached, validateImages } from '../uploads/uploads.service';
 import { buildFeed, commentView, postView, visiblePostsFor } from './posts.service';
 
 const feedQuery = z.object({
@@ -20,6 +21,7 @@ const createPostSchema = z.object({
   communityId: z.string().min(1, 'Choose a community.'),
   body: z.string().trim().min(3, 'Write a little more before sharing.').max(2000, 'Keep it under 2,000 characters.'),
   anonymous: z.boolean().default(true),
+  imageIds: z.array(z.string()).max(4, 'You can add up to 4 photos.').default([]),
 });
 
 const commentSchema = z.object({
@@ -59,8 +61,14 @@ postsRouter.post('/', validate(createPostSchema), asyncHandler((req, res) => {
   if (hasPersonalInfo(b.body)) {
     throw badRequest('Please remove phone numbers, emails or social handles to keep everyone anonymous and safe.', 'CONTAINS_PERSONAL_INFO');
   }
+  if (community.strictIdentity && hasLink(b.body)) {
+    throw badRequest('Links aren’t allowed in this community. Share your story without pointing to anyone online.', 'LINKS_NOT_ALLOWED');
+  }
+  if (b.imageIds.length > 0 && community.noImages) throw badRequest('Photos aren’t allowed in this community.', 'IMAGES_NOT_ALLOWED');
+  const imgs = validateImages(user.id, b.imageIds, 'post');
   const crisis = hasCrisisLanguage(b.body);
-  const post: Post = { id: newId(), authorId: user.id, communityId: community.id, body: b.body, anonymous: b.anonymous, status: 'visible', crisisFlag: crisis, createdAt: now() };
+  const post: Post = { id: newId(), authorId: user.id, communityId: community.id, body: b.body, anonymous: b.anonymous, imageIds: imgs.map((i) => i.id), status: 'visible', crisisFlag: crisis, createdAt: now() };
+  markAttached(imgs);
   db.data.posts.push(post);
   // Posting in a community implies following it.
   if (!db.data.memberships.some((m) => m.userId === user.id && m.communityId === community.id)) {
